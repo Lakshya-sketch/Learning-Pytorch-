@@ -4,6 +4,7 @@ import numpy
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_blobs
 import matplotlib.pyplot as plt
+from torchmetrics import Accuracy
 
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -102,15 +103,18 @@ y_blob_train = y_blob_train.to(device)
 X_blob_test = X_blob_test.to(device)
 y_blob_test = y_blob_test.to(device)
 
+torchmetric_accuracy = Accuracy().to(device)
+
 for epoch in range(epochs):
     model_4.train()
 
     y_logits = model_4(X_blob_train)
     y_pred = torch.softmax(y_logits, dim = 1).argmax(dim = 1)
 
+    torchmetric_accuracy(y_pred,y_blob_train)
+
     loss = loss_fn(y_logits,y_blob_train)
-    acc = accuracy_fn(y_true = y_blob_train,
-                      y_prep=y_pred)
+    
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
